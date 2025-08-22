@@ -83,7 +83,10 @@ const inventoryRoutes = require('./server/routes/inventoryRoutes');
 const quickCommerceRoutes = require("./server/routes/QuickCommerceRoutes");
 const containerRoutes = require('./server/routes/containerRoutes');
 const quickCommerceExecutiveRoutes = require("./server//routes/QuickCommerceExecutiveRoutes");
+const summaryRoutes = require('./newquickecom');
+ 
 
+ 
 const app = express();
 const PORT = process.env.PORT || 5000;
 console.log("PORT ===> ", PORT);
@@ -97,7 +100,7 @@ app.use("/api/quick-commerce", quickCommerceRoutes);
 app.use("/api/container", containerRoutes);
 app.use("/api/quick-commerce-executive", quickCommerceExecutiveRoutes);
 
-
+app.use("/summary", summaryRoutes);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
