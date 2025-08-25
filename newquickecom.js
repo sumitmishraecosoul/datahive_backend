@@ -6,17 +6,43 @@ const csv = require('csv-parser');
 
 const stream = require('stream');
 
- 
+const path = require('path');
 
-const AZURE_STORAGE_ACCOUNT_NAME = 'kineticadbms';
+// Load environment variables
+require('dotenv').config();
 
-const AZURE_STORAGE_ACCOUNT_KEY = 'JfMzO69p3Ip+Sz+YkXxp7sHxZw0O/JunSaS5qKnSSQnxk1lPhwiQwnGyyJif7sGB01l9amAdvU/t+ASthIK/ZQ==';
+// Debug: Check if dotenv loaded properly
+console.log('=== DOTENV DEBUG ===');
+console.log('Current working directory:', process.cwd());
+console.log('Looking for .env file in:', path.resolve('.env'));
+console.log('All AZURE environment variables:');
+Object.keys(process.env).filter(key => key.startsWith('AZURE')).forEach(key => {
+  console.log(`${key}: ${key.includes('KEY') ? '***HIDDEN***' : process.env[key]}`);
+});
 
-const AZURE_CONTAINER_NAME = 'thrive-worklytics';
+const AZURE_STORAGE_ACCOUNT_NAME = "kineticadbms";
+// const AZURE_STORAGE_ACCOUNT_KEY = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+const AZURE_STORAGE_ACCOUNT_KEY = "JfMzO69p3Ip+Sz+YkXxp7sHxZw0O/JunSaS5qKnSSQnxk1lPhwiQwnGyyJif7sGB01l9amAdvU/t+ASthIK/ZQ==";
+// const AZURE_CONTAINER_NAME = process.env.AZURE_CONTAINER_NAME;
+const AZURE_CONTAINER_NAME = "thrive-worklytics";
+// const BLOB_PATH = process.env.AZURE_BLOB_CONTAINER_SUMMARY_PATH;
+const BLOB_PATH = "supply-chain-db/supply-chain_quickcomerce_invoice.csv";
 
-const BLOB_PATH = 'supply-chain-db/supply-chain_quickcomerce_invoice.csv';
+// Debug logging to check environment variables
+console.log('=== ENVIRONMENT VARIABLES CHECK ===');
+console.log('AZURE_STORAGE_ACCOUNT_NAME:', AZURE_STORAGE_ACCOUNT_NAME);
+console.log('AZURE_STORAGE_ACCOUNT_KEY:', AZURE_STORAGE_ACCOUNT_KEY ? '***HIDDEN***' : 'UNDEFINED');
+console.log('AZURE_CONTAINER_NAME:', AZURE_CONTAINER_NAME);
+console.log('BLOB_PATH:', BLOB_PATH);
 
- 
+// Validate that all required environment variables are present
+if (!AZURE_STORAGE_ACCOUNT_NAME || !AZURE_STORAGE_ACCOUNT_KEY || !AZURE_CONTAINER_NAME || !BLOB_PATH) {
+  console.error('Missing required environment variables:');
+  if (!AZURE_STORAGE_ACCOUNT_NAME) console.error('- AZURE_STORAGE_ACCOUNT_NAME');
+  if (!AZURE_STORAGE_ACCOUNT_KEY) console.error('- AZURE_STORAGE_ACCOUNT_KEY');
+  if (!AZURE_CONTAINER_NAME) console.error('- AZURE_CONTAINER_NAME');
+  if (!BLOB_PATH) console.error('- AZURE_BLOB_CONTAINER_SUMMARY_PATH');
+}
 
 const AZURE_CONNECTION_STRING = `DefaultEndpointsProtocol=https;AccountName=${AZURE_STORAGE_ACCOUNT_NAME};AccountKey=${AZURE_STORAGE_ACCOUNT_KEY};EndpointSuffix=core.windows.net`;
 
@@ -29,6 +55,16 @@ const router = express.Router();
 // -------- Get CSV Data from Azure Blob --------
 
 async function getCsvData() {
+
+  // Validate environment variables before proceeding
+
+  if (!AZURE_STORAGE_ACCOUNT_NAME || !AZURE_STORAGE_ACCOUNT_KEY || !AZURE_CONTAINER_NAME || !BLOB_PATH) {
+
+    throw new Error('Missing required environment variables. Please check your .env file.');
+
+  }
+
+ 
 
   const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_CONNECTION_STRING);
 
